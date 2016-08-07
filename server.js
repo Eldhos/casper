@@ -21,6 +21,13 @@ app.use(function(req, res, next) {
 app.get('/hello', function(req, res){
   res.send("Hello express");
 });
+app.post('/search', function(req, res){
+  console.log(req);
+  console.log(req.body.hai);
+
+  res.send({success: 'true'});
+});
+
 app.listen(app.get('port'), function() {
   console.log('Server started: http://localhost:' + app.get('port') + '/');
 });
