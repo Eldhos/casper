@@ -1,62 +1,68 @@
 var SearchForm = React.createClass({
-  getInitialState: function(){
-    return ({origin:'',destination:''});
+  addOriginDestination: function(){
   },
-  handleSubmit: function(e){
-    e.preventDefault();
-    var origin= this.state.origin.trim();
-    var destination = this.state.destination.trim();
-    if(!origin || !destination){
-      return;
-    }
-    fetch('/search', {
-          method: 'POST',
-          headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                },
-          body: JSON.stringify({
-                origin: origin,
-                destination: destination,
-                })
+  render: function(){
+    return (
+      <div>
+      <form className = "form-inline" onSubmit={this.props.handleSubmit}>
+      <div className="form-group">
+        <input className="form-control" type="text" placeholder="Origin"
+          value={this.props.origin} />
+        <input className="form-control" type="text" placeholder="Destination"
+          value={this.props.destination} />
+        <button className="btn glyphicon glyphicon-search" type="submit"></button>
+        <button className="btn glyphicon glyphicon-plus" onClick={this.addOriginDestination}></button>
+      </div>
+    </form>
+      </div>
+    );
+  }
+});
+var SearchList = React.createClass({
+  render: function(){
+    var searchNodes = this.props.results.map(function(search){
+    return(
+      <SearchNode key={search.id} origin={search.origin} destination={search.destination}/>
+    );
     });
-
-    this.setState({origin:'',destination:''});
-  },
-  handleOriginChange: function(e){
-    this.setState({origin:e.target.value});
-  },
-  handleDestinationChange: function(e) {
-    this.setState({destination:e.target.value});
-  },
+    return(
+      <div className="searchList">
+        {searchNodes}
+      </div>
+    );
+  }
+});
+var SearchNode = React.createClass({
   render: function(){
     return(
       <div>
-        <form className = "form-inline" onSubmit={this.handleSubmit}>
-        <div className="form-group">
-          <input className="form-control" type="text" placeholder="Origin"
-            value={this.state.origin}
-            onChange={this.handleOriginChange} />
-          <input className="form-control" type="text" placeholder="Destination"
-            value={this.state.destination}
-            onChange={this.handleDestinationChange} />
-          <button className="btn btn-default" type="submit">Post</button>
-        </div>
-      </form>
-
-      <div className="originValue">
-        Origin is {this.state.origin}
-        <br></br>
-        Destination value is {this.state.destination}
-      </div>
+        <p>Origin: {this.props.origin}   Destination: {this.props.destination}</p>
+        <button className="btn btn-danger glyphicon glyphicon-trash"></button>
       </div>
 
     );
   }
 });
-
+var SearchContainer = React.createClass({
+  getInitialState: function(){
+    return {data:[{
+      id:1,
+      origin:'las',
+      destination:'lax',
+      newForm:false
+    }]};
+  },
+  render: function(){
+    return (
+      <div className="searchContainer">
+        <SearchList results={this.state.data} url={this.props.url}/>
+        <SearchForm/>
+      </div>
+            );
+  }
+});
 
 ReactDOM.render(
-  <SearchForm url="/search"/>,
+  <SearchContainer url="/search"/ >,
   document.getElementById("content")
 );
