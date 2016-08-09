@@ -3,11 +3,14 @@ var SearchForm = React.createClass({
     return {
       origin:'',
       destination:'',
+      adult:0,
+      senior:0,
+      infantLap:0,
+      infantSeat:0
     }
 
   },
-  addOriginDestination: function(e){
-    e.preventDefault();
+  addOriginDestination: function(){
     var origin = this.state.origin;
     var destination = this.state.destination;
     if(!origin || !destination){
@@ -20,13 +23,15 @@ var SearchForm = React.createClass({
     e.preventDefault();
     var origin = this.state.origin;
     var destination = this.state.destination;
-    if(!origin || !destination){
-      this.props.search(null);
-    } else {
-      this.props.search({origin:origin, destination: destination});
-
+    var adult = this.state.adult;
+    var senior = this.state.senior;
+    var infantLap = this.state.infantLap;
+    var infantSeat = this.state.infantSeat;
+    if(!!origin || !!destination){
+      this.addOriginDestination();
     }
-    this.setState({origin:'',destination:''});
+    this.props.search({adult:adult, senior:senior, infantLap:infantLap, infantSeat:infantSeat});
+    this.setState({origin:'',destination:'', adult:0, senior:0, infantLap:0, infantSeat:0});
   },
   handleOriginChange: function(e){
     this.setState({origin:e.target.value});
@@ -34,20 +39,35 @@ var SearchForm = React.createClass({
   handleDestinationChange: function(e){
     this.setState({destination: e.target.value});
   },
+  incAdultCount: function(e){
+    this.setState({adult: this.state.adult+1 });
+  },
+  incSeniorCount:function(e){
+    this.setState({senior: this.state.senior+1});
+  },
+  incInfantSeatCount:function(e){
+    this.setState({infantSeat:this.state.infantSeat+1})
+  },
+  incInfantLapCount:function(e){
+    this.setState({infantLap:this.state.infantLap+1})
+  },
   render: function(){
     return (
-      <div>
       <form className = "form-inline" onSubmit={this.handleSubmit}>
-      <div className="form-group">
-        <input className="form-control" type="text" placeholder="Origin"
-          value={this.state.origin} onChange={this.handleOriginChange}/>
-        <input className="form-control" type="text" placeholder="Destination"
-          value={this.state.destination} onChange={this.handleDestinationChange}/>
-        <button className="btn glyphicon glyphicon-search" type="submit"></button>
-        <button className="btn glyphicon glyphicon-plus" onClick={this.addOriginDestination}></button>
-      </div>
+        <div className="form-group">
+          <input className="form-control" type="text" placeholder="Origin" value={this.state.origin} onChange={this.handleOriginChange}/>
+          <input className="form-control" type="text" placeholder="Destination" value={this.state.destination} onChange={this.handleDestinationChange}/>
+          <button className="btn glyphicon glyphicon-plus" onClick={this.addOriginDestination}></button>
+          <p/>
+          <div className="btn btn-toolbar">
+            <button className="btn btn-primary" type="button" onClick={this.incAdultCount}>Adult<span className="badge">{this.state.adult}</span></button>
+            <button className="btn btn-info" type="button" onClick={this.incSeniorCount}>Senior <span className="badge">{this.state.senior}</span></button>
+            <button className="btn btn-warning" type="button" onClick={this.incInfantSeatCount}>Infant Seat<span className="badge">{this.state.infantSeat}</span></button>
+            <button className="btn btn-danger" type="button" onClick={this.incInfantLapCount}>Infant Lap <span className="badge">{this.state.infantLap}</span></button>
+            <button className="btn glyphicon glyphicon-search" type="submit"></button>
+          </div>
+        </div>
     </form>
-      </div>
     );
   }
 });
@@ -79,24 +99,18 @@ var SearchNode = React.createClass({
 });
 var SearchContainer = React.createClass({
   getInitialState: function(){
-    return {data:[{
-      id:1,
-      origin:'las',
-      destination:'lax',
-      newForm:false
-    }]};
+    return {data:[]};
   },
   addToOriginDestination:function(search){
     var currentSearch = this.state.data;
     search.id = Date.now();
     this.setState({data: currentSearch.concat([search])});
   },
-  doTheThing: function(search){
-    var searchData=this.state.data;
-    var sendSearch = searchData;
-    if(search != null) {
-      search.id = Date.now();
-      sendSearch = searchData.concat([search])
+  doTheThing: function(travelerDetails){
+    var searchData = this.state.data;
+    var search = {
+      itinerary:searchData,
+      travelers:travelerDetails
     }
     fetch('/search', {
            method: 'POST',
@@ -104,9 +118,9 @@ var SearchContainer = React.createClass({
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
                 },
-          body: JSON.stringify(sendSearch)
+          body: JSON.stringify(search)
      });
-     this.setState({data:sendSearch});
+     this.setState({data:searchData});
   },
   render: function(){
     return (
